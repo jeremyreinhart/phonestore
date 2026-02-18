@@ -64,7 +64,6 @@ export default function ProductDetailPage() {
 
     fetchProduct();
 
-    // --- LOGIKA REALTIME MULAI DISINI ---
     const channel = supabase
       .channel(`detail-produk-${id}`)
       .on(
@@ -87,7 +86,6 @@ export default function ProductDetailPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-    // --- LOGIKA REALTIME SELESAI ---
   }, [id]);
 
   const handleAddToCart = async () => {

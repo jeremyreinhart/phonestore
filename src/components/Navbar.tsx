@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
-import { ShoppingCart, ChevronDown } from "lucide-react";
+import { ShoppingCart, ChevronDown, Menu, X } from "lucide-react";
 
 interface UserProfile {
   id: string;
@@ -25,6 +25,7 @@ export default function Header() {
 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -95,25 +96,25 @@ export default function Header() {
   return (
     <header className="w-full bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <Image src="/logo-store.png" alt="Logo" width={40} height={40} />
           <span className="font-bold text-xl text-green-600">PhoneStore</span>
         </Link>
 
-        <div className="flex items-center gap-6">
-          <div className="relative">
-            <button
-              onClick={handleCartClick}
-              className="hover:opacity-80 transition"
-            >
-              <ShoppingCart size={24} />
-              {user && cart.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                  {cart.reduce((acc, item) => acc + item.quantity, 0)}
-                </span>
-              )}
-            </button>
-          </div>
+        {/* Desktop Menu */}
+        <nav className="hidden md:flex items-center gap-6">
+          <button
+            onClick={handleCartClick}
+            className="relative hover:opacity-80 transition"
+          >
+            <ShoppingCart size={24} />
+            {user && cart.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                {cart.reduce((acc, item) => acc + item.quantity, 0)}
+              </span>
+            )}
+          </button>
 
           {user ? (
             <div className="relative" ref={dropdownRef}>
@@ -173,7 +174,7 @@ export default function Header() {
               )}
             </div>
           ) : (
-            <div className="flex gap-3">
+            <>
               <Link
                 href="/auth/login"
                 className="px-4 py-2 border border-green-600 text-green-600 rounded-lg"
@@ -186,10 +187,98 @@ export default function Header() {
               >
                 Daftar
               </Link>
-            </div>
+            </>
           )}
+        </nav>
+
+        {/* Mobile Hamburger */}
+        <div className="md:hidden flex items-center gap-4">
+          <button
+            onClick={handleCartClick}
+            className="relative hover:opacity-80 transition"
+          >
+            <ShoppingCart size={24} />
+            {user && cart.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                {cart.reduce((acc, item) => acc + item.quantity, 0)}
+              </span>
+            )}
+          </button>
+
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white border-t shadow-md px-6 py-4 space-y-4">
+          {user ? (
+            <>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-600 text-white flex items-center justify-center font-semibold text-sm overflow-hidden">
+                  {user.avatar_url ? (
+                    <Image
+                      src={user.avatar_url}
+                      alt="avatar"
+                      width={40}
+                      height={40}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    user.name?.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">{user.name}</p>
+                  <p className="text-xs text-gray-500">{user.email}</p>
+                </div>
+              </div>
+
+              {user.role === "USER" && (
+                <Link
+                  href="/orders"
+                  className="block px-2 py-2 hover:bg-gray-100 rounded text-sm"
+                >
+                  History Order
+                </Link>
+              )}
+
+              {user.role === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  className="block px-2 py-2 hover:bg-gray-100 rounded text-sm"
+                >
+                  Admin Dashboard
+                </Link>
+              )}
+
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-2 py-2 hover:bg-gray-100 text-sm text-red-500 rounded"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="block px-2 py-2 border border-green-600 text-green-600 rounded-lg text-center"
+              >
+                Masuk
+              </Link>
+              <Link
+                href="/auth/register"
+                className="block px-2 py-2 bg-green-600 text-white rounded-lg text-center"
+              >
+                Daftar
+              </Link>
+            </>
+          )}
+        </div>
+      )}
     </header>
   );
 }

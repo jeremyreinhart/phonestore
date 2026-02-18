@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { useCartStore } from "@/store/cartStore";
-import { RealtimeChannel } from "@supabase/supabase-js"; // Import tipe data channel
+import { RealtimeChannel } from "@supabase/supabase-js";
 import Image from "next/image";
 import Script from "next/script";
 import Header from "@/components/Navbar";
@@ -111,7 +111,7 @@ export default function OrderSuccessPage() {
             );
 
             if (updated.status === "PAID") {
-              await clearCart(user.id);
+              await clearCart();
               await fetchCart(user.id);
             }
           },
@@ -161,7 +161,7 @@ export default function OrderSuccessPage() {
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Memverifikasi pembayaran...
+        Loading...
       </div>
     );
   if (!order)

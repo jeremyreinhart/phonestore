@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
           });
         }
       }
-      // Ambil user_id dari order
+
       const { data: orderData } = await supabase
         .from("orders")
         .select("user_id")
@@ -81,7 +81,6 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (orderData?.user_id) {
-        // Ambil email user dari tabel users
         const { data: userData } = await supabase
           .from("users")
           .select("email, name")
@@ -89,14 +88,42 @@ export async function POST(req: NextRequest) {
           .single();
 
         if (userData?.email) {
+          // TEMPLATE EMAIL YANG LEBIH DETAIL DAN MENARIK
+          const emailHtml = `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e1e1e1; border-radius: 10px; overflow: hidden; background-color: #ffffff;">
+              <div style="background-color: #000; padding: 25px; text-align: center;">
+                <h1 style="color: #fff; margin: 0; font-size: 24px; letter-spacing: 2px;">PHONE STORE</h1>
+              </div>
+              <div style="padding: 30px; line-height: 1.6; color: #333;">
+                <h2 style="color: #28a745; margin-top: 0;">Pembayaran Berhasil! ✅</h2>
+                <p>Halo <strong>${userData.name ?? "Pelanggan"}</strong>,</p>
+                <p>Terima kasih telah berbelanja. Kami telah menerima pembayaran Anda untuk pesanan <strong>#${orderId}</strong>.</p>
+                
+                <div style="margin: 25px 0; padding: 20px; background-color: #f9f9f9; border-left: 5px solid #28a745; border-radius: 4px;">
+                  <p style="margin: 0; font-size: 14px; color: #666;">Status Saat Ini:</p>
+                  <p style="margin: 5px 0 0 0; font-weight: bold; color: #28a745; font-size: 18px;">SIAP DIPROSES</p>
+                </div>
+
+                <p>Tim kami akan segera menyiapkan produk Anda. Anda akan mendapatkan notifikasi email selanjutnya saat paket Anda telah dikirim ke kurir.</p>
+                
+                <div style="text-align: center; margin: 35px 0;">
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL}/orders/${orderId}" 
+                     style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                     Lihat Detail Pesanan
+                  </a>
+                </div>
+              </div>
+              <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee;">
+                <p style="margin: 0;">© 2026 Phone Store. All rights reserved.</p>
+                <p style="margin: 5px 0 0 0;">Jl. Tech Raya No. 101, Jakarta, Indonesia</p>
+              </div>
+            </div>
+          `;
+
           await sendOrderEmail(
             userData.email,
-            "Pembayaran Berhasil ",
-            `
-        <h2>Terima kasih ${userData.name ?? ""}!</h2>
-        <p>Order #${orderId} telah berhasil dibayar.</p>
-        <p>Kami akan segera memproses pesanan Anda.</p>
-      `,
+            `Konfirmasi Pembayaran: Order #${orderId} Berhasil`,
+            emailHtml,
           );
         }
       }
