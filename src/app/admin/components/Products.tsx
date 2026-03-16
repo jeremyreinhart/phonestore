@@ -23,7 +23,7 @@ export default function Products() {
     try {
       const res = await fetch("/api/products");
       const data = await res.json();
-      setProducts(Array.isArray(data) ? data : []);
+      setProducts(Array.isArray(data.data) ? data.data : []);
     } catch (err) {
       console.error(err);
     } finally {

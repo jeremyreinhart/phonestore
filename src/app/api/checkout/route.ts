@@ -35,15 +35,25 @@ export async function POST(req: NextRequest) {
     const body: CheckoutRequest = await req.json();
 
     if (!body.cart || body.cart.length === 0) {
-      return NextResponse.json({ error: "Cart kosong" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Cart cannot be empty" },
+        { status: 400 },
+      );
     }
 
     const shippingCost = 2500;
 
-    const totalPrice = body.cart.reduce(
-      (acc: number, item: CartItem) => acc + item.price * item.quantity,
-      0,
-    );
+    const totalPrice = body.cart.reduce((total, item) => {
+      if (!item.id || !item.price || !item.quantity) {
+        throw new Error("Invalid cart item structure");
+      }
+
+      if (item.price <= 0 || item.quantity <= 0) {
+        throw new Error("Invalid price or quantity value");
+      }
+
+      return total + item.price * item.quantity;
+    }, 0);
 
     const grossAmount = totalPrice + shippingCost;
 
